@@ -11,16 +11,25 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func ListingUsers() {
-	userRepository := repository.UserRepository()
+func SelectUser() models.User {
+	userRepository := repository.UserRepository{}
 	users := userRepository.Find()
 	var items []string
 
-	
-	prompt := promptui.Select{
-		Label: nil,
-		Items
+	for _, user := range users {
+		items = append(items, fmt.Sprintf("[%d] %s", user.ID, user.Name))
 	}
+
+	prompt := promptui.Select{
+		Label:        "Selecione um usuário",
+		Items:        items,
+		HideHelp:     true,
+		HideSelected: true,
+	}
+
+	selectedIndex, _, _ := prompt.Run()
+
+	return users[selectedIndex]
 }
 
 func MainMenuScreen() {
@@ -45,11 +54,11 @@ func MainMenuScreen() {
 
 func MainUserScreen() {
 	options := map[string]func(){
-		"Visualizar Usuários": func() {},
+		"Visualizar Usuários": ViewUsers,
 		"Criar Usuário":       CreateUser,
-		"Alterar Usuário":     func() {},
-		"Deletar Usuário":     func() {},
-		"Sair":                func() {},
+		"Alterar Usuário":     UpdateUser,
+		"Deletar Usuário":     DeleteUser,
+		"Sair":                MainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
 		Label: "-- Gerenciador de Usuários --",
@@ -77,7 +86,47 @@ func CreateUser() {
 }
 
 func UpdateUser() {
+	user := SelectUser()
+	prompt := promptui.Prompt{
+		Label:   "Nome: ",
+		Default: user.Name,
+	}
+	newName, _ := prompt.Run()
 
+	prompt = promptui.Prompt{
+		Label:   "Email: ",
+		Default: user.Email,
+	}
+	newEmail, _ := prompt.Run()
+
+	user.Name = newName
+	user.Email = newEmail
+	userRepository := repository.UserRepository{}
+
+	userRepository.Update(user)
+	fmt.Println("Usuário atualizado!\nPressione qualquer tecla para continuar.")
+	fmt.Scanln()
+	MainMenuScreen()
+}
+
+func DeleteUser() {
+	user := SelectUser()
+	userRepository := repository.UserRepository{}
+	userRepository.Delete(user)
+	fmt.Println("Usuário deletado!\nPressione qualquer tecla para continuar.")
+	fmt.Scanln()
+	MainMenuScreen()
+}
+
+func ViewUsers() {
+	user := SelectUser()
+	fmt.Println("-- Usuário --")
+	fmt.Println("ID: ", user.ID)
+	fmt.Println("Nome: ", user.Name)
+	fmt.Println("Email: ", user.Email)
+	fmt.Println("\nPressione qualquer tecla para continuar.")
+	fmt.Scanln()
+	MainMenuScreen()
 }
 
 func main() {

@@ -24,7 +24,7 @@ func (userRepository UserRepository) Save(user models.User) {
 
 // Update : update user
 func (userRepository UserRepository) Update(user models.User) {
-	database.Instance().Update()
+	database.Instance().Save(&user)
 }
 
 // FindByID : find user by id
@@ -37,6 +37,11 @@ func (userRepository UserRepository) FindByID(id int) models.User {
 // Find : find users
 func (userRepository UserRepository) Find(conds ...interface{}) []models.User {
 	var users []models.User
-	database.Instance().Find(&users, conds)
+	database.Instance().Find(&users, conds...)
 	return users
+}
+
+// Delete : delete user
+func (userRepository UserRepository) Delete(user models.User) {
+	database.Instance().Delete(&user)
 }

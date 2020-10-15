@@ -24,7 +24,7 @@ func ClearScreen() {
 
 // GetMapKeys : get map keys
 func GetMapKeys(data map[string]func()) []string {
-	keys := make([]string, 0, len(data))
+	var keys []string
 	for key := range data {
 		keys = append(keys, key)
 	}
