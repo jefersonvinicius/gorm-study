@@ -39,6 +39,7 @@ func MainMenuScreen() {
 			fmt.Println("Gerenciar Produtos")
 		},
 		"Gerenciar Usuários": MainUserScreen,
+		"Gerenciar Cartões":  MainCardScreen,
 	}
 	v := reflect.ValueOf(options)
 
@@ -127,6 +128,16 @@ func ViewUsers() {
 	fmt.Println("\nPressione qualquer tecla para continuar.")
 	fmt.Scanln()
 	MainMenuScreen()
+}
+
+func MainCardScreen() {
+	user := SelectUser()
+	fmt.Println(user.Card)
+	// if user.Card != nil {
+	// 	fmt.Println("Possui cartão")
+	// } else {
+	// 	fmt.Println("Não possui cartão")
+	// }
 }
 
 func main() {

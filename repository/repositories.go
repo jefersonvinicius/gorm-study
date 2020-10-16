@@ -45,3 +45,35 @@ func (userRepository UserRepository) Find(conds ...interface{}) []models.User {
 func (userRepository UserRepository) Delete(user models.User) {
 	database.Instance().Delete(&user)
 }
+
+// CardRepository : card repository
+type CardRepository struct{}
+
+// Save : save card
+func (cardRespository CardRepository) Save(card models.Card) {
+	database.Instance().Create(&card)
+}
+
+// Update : update card
+func (cardRespository CardRepository) Update(card models.Card) {
+	database.Instance().Save(&card)
+}
+
+// FindByID : find user by id
+func (cardRespository CardRepository) FindByID(id int) models.Card {
+	var card models.Card
+	database.Instance().First(&card, id)
+	return card
+}
+
+// Find : find cards
+func (cardRespository CardRepository) Find(conds ...interface{}) []models.Card {
+	var cards []models.Card
+	database.Instance().Find(&cards, conds...)
+	return cards
+}
+
+// Delete : delete card
+func (cardRespository CardRepository) Delete(card models.Card) {
+	database.Instance().Delete(&card)
+}
