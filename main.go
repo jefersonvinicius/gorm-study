@@ -5,15 +5,15 @@ import (
 	"gormstudy/database"
 	"gormstudy/helpers"
 	"gormstudy/models"
-	"gormstudy/repository"
+	"gormstudy/repositories/cardsrepository"
+	"gormstudy/repositories/usersrepository"
 	"reflect"
 
 	"github.com/manifoldco/promptui"
 )
 
 func SelectUser() models.User {
-	userRepository := repository.UserRepository{}
-	users := userRepository.Find()
+	users := usersrepository.Find()
 	var items []string
 
 	for _, user := range users {
@@ -54,7 +54,7 @@ func MainMenuScreen() {
 }
 
 func MainUserScreen() {
-	options := map[string]func(){
+	options := map[string]interface{}{
 		"Visualizar Usuários": ViewUsers,
 		"Criar Usuário":       CreateUser,
 		"Alterar Usuário":     UpdateUser,
@@ -66,7 +66,7 @@ func MainUserScreen() {
 		Items: helpers.GetMapKeys(options),
 	}
 	_, option, _ := selectPrompt.Run()
-	options[option]()
+	options[option].(func())()
 }
 
 func CreateUser() {
@@ -79,8 +79,7 @@ func CreateUser() {
 	}
 	email, _ := prompt.Run()
 	user := models.User{Name: name, Email: email}
-	userRepository := repository.UserRepository{}
-	userRepository.Save(user)
+	usersrepository.Save(user)
 	fmt.Println("Usuário salvo!\nPressione qualquer tecla para continuar.")
 	fmt.Scanln()
 	MainMenuScreen()
@@ -102,9 +101,8 @@ func UpdateUser() {
 
 	user.Name = newName
 	user.Email = newEmail
-	userRepository := repository.UserRepository{}
 
-	userRepository.Update(user)
+	usersrepository.Update(user)
 	fmt.Println("Usuário atualizado!\nPressione qualquer tecla para continuar.")
 	fmt.Scanln()
 	MainMenuScreen()
@@ -112,8 +110,7 @@ func UpdateUser() {
 
 func DeleteUser() {
 	user := SelectUser()
-	userRepository := repository.UserRepository{}
-	userRepository.Delete(user)
+	usersrepository.Delete(user)
 	fmt.Println("Usuário deletado!\nPressione qualquer tecla para continuar.")
 	fmt.Scanln()
 	MainMenuScreen()
@@ -132,12 +129,47 @@ func ViewUsers() {
 
 func MainCardScreen() {
 	user := SelectUser()
-	fmt.Println(user.Card)
-	// if user.Card != nil {
-	// 	fmt.Println("Possui cartão")
-	// } else {
-	// 	fmt.Println("Não possui cartão")
-	// }
+	usersrepository.Association(user, "Card").Find(&user.Card)
+
+	if user.Card.ID == 0 {
+		card := CreateCard()
+		user.Card = card
+		usersrepository.Update(user)
+	}
+	options := map[string]interface{}{
+		"Excluir Cartão": func() { DeleteCard(user.Card) },
+		"Editar Cartão":  func() {},
+		"Sair":           MainMenuScreen,
+	}
+	selectPrompt := promptui.Select{
+		Label: fmt.Sprintf("Cartão - %s (%s)", user.Name, user.Card.Number),
+		Items: helpers.GetMapKeys(options),
+	}
+	_, option, _ := selectPrompt.Run()
+	options[option].(func())()
+}
+
+func CreateCard() models.Card {
+	prompt := promptui.Prompt{
+		Label: "Número",
+	}
+	number, _ := prompt.Run()
+	prompt = promptui.Prompt{
+		Label: "Senha",
+		Mask:  '*',
+	}
+	password, _ := prompt.Run()
+	card := models.Card{Number: number, Password: password}
+	fmt.Println("Cartão criado!\nPressione qualquer tecla para continuar.")
+	fmt.Scanln()
+	return card
+}
+
+func DeleteCard(card models.Card) {
+	cardsrepository.Delete(card)
+	fmt.Println("Cartão deletado!\nPressione qualquer tecla para continuar.")
+	fmt.Scanln()
+	MainMenuScreen()
 }
 
 func main() {

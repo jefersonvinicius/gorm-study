@@ -23,7 +23,7 @@ func ClearScreen() {
 }
 
 // GetMapKeys : get map keys
-func GetMapKeys(data map[string]func()) []string {
+func GetMapKeys(data map[string]interface{}) []string {
 	var keys []string
 	for key := range data {
 		keys = append(keys, key)

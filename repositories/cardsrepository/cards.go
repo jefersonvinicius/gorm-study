@@ -1,4 +1,4 @@
-package cards
+package cardsrepository
 
 import (
 	"gormstudy/database"

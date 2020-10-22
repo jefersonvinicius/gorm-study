@@ -1,8 +1,10 @@
-package users
+package usersrepository
 
 import (
 	"gormstudy/database"
 	"gormstudy/models"
+
+	"gorm.io/gorm"
 )
 
 // Save : save user
@@ -32,4 +34,9 @@ func Find(conds ...interface{}) []models.User {
 // Delete : delete user
 func Delete(user models.User) {
 	database.Instance().Delete(&user)
+}
+
+// Association : return association
+func Association(instance interface{}, column string) *gorm.Association {
+	return database.Instance().Model(instance).Association(column)
 }
