@@ -40,3 +40,8 @@ func Delete(user models.User) {
 func Association(instance interface{}, column string) *gorm.Association {
 	return database.Instance().Model(instance).Association(column)
 }
+
+// Select : select association
+func Select(column string) *gorm.DB {
+	return database.Instance().Select(column)
+}

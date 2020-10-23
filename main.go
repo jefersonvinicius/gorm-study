@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"gormstudy/cruds"
 	"gormstudy/database"
 	"gormstudy/helpers"
 	"gormstudy/models"
@@ -11,26 +12,6 @@ import (
 
 	"github.com/manifoldco/promptui"
 )
-
-func SelectUser() models.User {
-	users := usersrepository.Find()
-	var items []string
-
-	for _, user := range users {
-		items = append(items, fmt.Sprintf("[%d] %s", user.ID, user.Name))
-	}
-
-	prompt := promptui.Select{
-		Label:        "Selecione um usuário",
-		Items:        items,
-		HideHelp:     true,
-		HideSelected: true,
-	}
-
-	selectedIndex, _, _ := prompt.Run()
-
-	return users[selectedIndex]
-}
 
 func MainMenuScreen() {
 	helpers.ClearScreen()
@@ -55,7 +36,7 @@ func MainMenuScreen() {
 
 func MainUserScreen() {
 	options := map[string]interface{}{
-		"Visualizar Usuários": ViewUsers,
+		"Visualizar Usuários": cruds.ViewsUser,
 		"Criar Usuário":       CreateUser,
 		"Alterar Usuário":     UpdateUser,
 		"Deletar Usuário":     DeleteUser,
@@ -69,65 +50,10 @@ func MainUserScreen() {
 	options[option].(func())()
 }
 
-func CreateUser() {
-	prompt := promptui.Prompt{
-		Label: "Nome",
-	}
-	name, _ := prompt.Run()
-	prompt = promptui.Prompt{
-		Label: "Email",
-	}
-	email, _ := prompt.Run()
-	user := models.User{Name: name, Email: email}
-	usersrepository.Save(user)
-	fmt.Println("Usuário salvo!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
-	MainMenuScreen()
-}
-
-func UpdateUser() {
-	user := SelectUser()
-	prompt := promptui.Prompt{
-		Label:   "Nome: ",
-		Default: user.Name,
-	}
-	newName, _ := prompt.Run()
-
-	prompt = promptui.Prompt{
-		Label:   "Email: ",
-		Default: user.Email,
-	}
-	newEmail, _ := prompt.Run()
-
-	user.Name = newName
-	user.Email = newEmail
-
-	usersrepository.Update(user)
-	fmt.Println("Usuário atualizado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
-	MainMenuScreen()
-}
-
-func DeleteUser() {
-	user := SelectUser()
-	usersrepository.Delete(user)
-	fmt.Println("Usuário deletado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
-	MainMenuScreen()
-}
-
-func ViewUsers() {
-	user := SelectUser()
-	fmt.Println("-- Usuário --")
-	fmt.Println("ID: ", user.ID)
-	fmt.Println("Nome: ", user.Name)
-	fmt.Println("Email: ", user.Email)
-	fmt.Println("\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
-	MainMenuScreen()
-}
-
 func MainCardScreen() {
+
+	helpers.ClearScreen()
+
 	user := SelectUser()
 	usersrepository.Association(user, "Card").Find(&user.Card)
 
@@ -138,12 +64,13 @@ func MainCardScreen() {
 	}
 	options := map[string]interface{}{
 		"Excluir Cartão": func() { DeleteCard(user.Card) },
-		"Editar Cartão":  func() {},
+		"Editar Cartão":  func() { UpdateCard(user.Card) },
 		"Sair":           MainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
-		Label: fmt.Sprintf("Cartão - %s (%s)", user.Name, user.Card.Number),
-		Items: helpers.GetMapKeys(options),
+		Label:    fmt.Sprintf("Cartão - %s (%s)", user.Name, user.Card.Number),
+		Items:    helpers.GetMapKeys(options),
+		HideHelp: true,
 	}
 	_, option, _ := selectPrompt.Run()
 	options[option].(func())()
@@ -163,6 +90,26 @@ func CreateCard() models.Card {
 	fmt.Println("Cartão criado!\nPressione qualquer tecla para continuar.")
 	fmt.Scanln()
 	return card
+}
+
+func UpdateCard(card models.Card) {
+	prompt := promptui.Prompt{
+		Label:   "Número",
+		Default: card.Number,
+	}
+	newNumber, _ := prompt.Run()
+	prompt = promptui.Prompt{
+		Label:   "Senha",
+		Default: card.Password,
+	}
+	newPassword, _ := prompt.Run()
+	card.Number = newNumber
+	card.Password = newPassword
+	cardsrepository.Update(card)
+	fmt.Println("Cartão atualizado!\nPressione qualquer tecla para continuar.")
+	fmt.Scanln()
+	MainCardScreen()
+
 }
 
 func DeleteCard(card models.Card) {
