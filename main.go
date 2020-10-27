@@ -6,21 +6,20 @@ import (
 	"gormstudy/database"
 	"gormstudy/helpers"
 	"gormstudy/models"
-	"gormstudy/repositories/cardsrepository"
 	"gormstudy/repositories/usersrepository"
 	"reflect"
 
 	"github.com/manifoldco/promptui"
 )
 
-func MainMenuScreen() {
+func mainMenuScreen() {
 	helpers.ClearScreen()
 	options := map[string]func(){
 		"Gerenciar Produtos": func() {
 			fmt.Println("Gerenciar Produtos")
 		},
-		"Gerenciar Usuários": MainUserScreen,
-		"Gerenciar Cartões":  MainCardScreen,
+		"Gerenciar Usuários": mainUserScreen,
+		"Gerenciar Cartões":  mainCardScreen,
 	}
 	v := reflect.ValueOf(options)
 
@@ -32,15 +31,16 @@ func MainMenuScreen() {
 	}
 	_, option, _ := selectPrompt.Run()
 	options[option]()
+	mainMenuScreen()
 }
 
-func MainUserScreen() {
+func mainUserScreen() {
 	options := map[string]interface{}{
-		"Visualizar Usuários": cruds.ViewsUser,
-		"Criar Usuário":       CreateUser,
-		"Alterar Usuário":     UpdateUser,
-		"Deletar Usuário":     DeleteUser,
-		"Sair":                MainMenuScreen,
+		"Visualizar Usuários": cruds.ViewUsers,
+		"Criar Usuário":       cruds.CreateUser,
+		"Alterar Usuário":     cruds.UpdateUser,
+		"Deletar Usuário":     cruds.DeleteUser,
+		"Sair":                mainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
 		Label: "-- Gerenciador de Usuários --",
@@ -50,22 +50,22 @@ func MainUserScreen() {
 	options[option].(func())()
 }
 
-func MainCardScreen() {
+func mainCardScreen() {
 
 	helpers.ClearScreen()
 
-	user := SelectUser()
+	user := helpers.SelectUser()
 	usersrepository.Association(user, "Card").Find(&user.Card)
 
 	if user.Card.ID == 0 {
-		card := CreateCard()
+		card := cruds.CreateCard()
 		user.Card = card
 		usersrepository.Update(user)
 	}
 	options := map[string]interface{}{
-		"Excluir Cartão": func() { DeleteCard(user.Card) },
-		"Editar Cartão":  func() { UpdateCard(user.Card) },
-		"Sair":           MainMenuScreen,
+		"Excluir Cartão": func() { cruds.DeleteCard(user.Card) },
+		"Editar Cartão":  func() { cruds.UpdateCard(user.Card) },
+		"Sair":           mainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
 		Label:    fmt.Sprintf("Cartão - %s (%s)", user.Name, user.Card.Number),
@@ -76,47 +76,20 @@ func MainCardScreen() {
 	options[option].(func())()
 }
 
-func CreateCard() models.Card {
-	prompt := promptui.Prompt{
-		Label: "Número",
+func mainProductsScreen() {
+	options := map[string]interface{}{
+		"Visualizar Produtos": cruds.ViewUsers,
+		"Criar Produto":       cruds.CreateUser,
+		"Alterar Produto":     cruds.UpdateUser,
+		"Deletar Produto":     cruds.DeleteUser,
+		"Sair":                mainMenuScreen,
 	}
-	number, _ := prompt.Run()
-	prompt = promptui.Prompt{
-		Label: "Senha",
-		Mask:  '*',
+	selectPrompt := promptui.Select{
+		Label: "-- Gerenciador de Produtos --",
+		Items: helpers.GetMapKeys(options),
 	}
-	password, _ := prompt.Run()
-	card := models.Card{Number: number, Password: password}
-	fmt.Println("Cartão criado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
-	return card
-}
-
-func UpdateCard(card models.Card) {
-	prompt := promptui.Prompt{
-		Label:   "Número",
-		Default: card.Number,
-	}
-	newNumber, _ := prompt.Run()
-	prompt = promptui.Prompt{
-		Label:   "Senha",
-		Default: card.Password,
-	}
-	newPassword, _ := prompt.Run()
-	card.Number = newNumber
-	card.Password = newPassword
-	cardsrepository.Update(card)
-	fmt.Println("Cartão atualizado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
-	MainCardScreen()
-
-}
-
-func DeleteCard(card models.Card) {
-	cardsrepository.Delete(card)
-	fmt.Println("Cartão deletado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
-	MainMenuScreen()
+	_, option, _ := selectPrompt.Run()
+	options[option].(func())()
 }
 
 func main() {
@@ -125,7 +98,7 @@ func main() {
 	database.Instance().AutoMigrate(&models.User{})
 	database.Instance().AutoMigrate(&models.Card{})
 
-	MainMenuScreen()
+	mainMenuScreen()
 }
 
 func checkError(err error) {

@@ -9,6 +9,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
+// CreateUser create user
 func CreateUser() {
 	prompt := promptui.Prompt{
 		Label: "Nome",
@@ -24,6 +25,7 @@ func CreateUser() {
 	fmt.Scanln()
 }
 
+// UpdateUser update user
 func UpdateUser() {
 	user := helpers.SelectUser()
 	prompt := promptui.Prompt{
@@ -46,6 +48,7 @@ func UpdateUser() {
 	fmt.Scanln()
 }
 
+// DeleteUser delete user
 func DeleteUser() {
 	user := helpers.SelectUser()
 	usersrepository.Select("Card").Delete(&user)
@@ -53,6 +56,7 @@ func DeleteUser() {
 	fmt.Scanln()
 }
 
+// ViewUsers view users
 func ViewUsers() {
 	user := helpers.SelectUser()
 	usersrepository.Association(user, "Card").Find(&user.Card)
