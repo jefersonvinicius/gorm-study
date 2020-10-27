@@ -37,6 +37,20 @@ func GetMapKeys(data map[string]interface{}) []string {
 	return keys
 }
 
+// ExistsAvailableProducts check if exists products in database
+func ExistsAvailableProducts() bool {
+	var products []models.Product
+	database.Instance().Find(&products)
+	return len(products) > 0
+}
+
+// ExistsAvailableUsers check if exists users in database
+func ExistsAvailableUsers() bool {
+	var users []models.User
+	database.Instance().Find(&users)
+	return len(users) > 0
+}
+
 // SelectUser : select user
 func SelectUser() models.User {
 	users := usersrepository.Find()
@@ -56,13 +70,6 @@ func SelectUser() models.User {
 	selectedIndex, _, _ := prompt.Run()
 
 	return users[selectedIndex]
-}
-
-// ExistsAvailableProducts check if exists products in database
-func ExistsAvailableProducts() bool {
-	var products []models.Product
-	database.Instance().Find(&products)
-	return len(products) > 0
 }
 
 // SelectProduct : select user

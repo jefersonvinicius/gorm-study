@@ -53,7 +53,7 @@ func mainCardScreen() {
 	helpers.ClearScreen()
 
 	user := helpers.SelectUser()
-	usersrepository.Association(user, "Card").Find(&user.Card)
+	database.Instance().Model(user).Association("Card").Find(&user.Card)
 
 	if user.Card.ID == 0 {
 		card := cruds.CreateCard()

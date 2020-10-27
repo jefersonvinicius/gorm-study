@@ -27,52 +27,61 @@ func CreateUser() {
 
 // UpdateUser update user
 func UpdateUser() {
-	user := helpers.SelectUser()
-	prompt := promptui.Prompt{
-		Label:   "Nome: ",
-		Default: user.Name,
+	if helpers.ExistsAvailableUsers() {
+		user := helpers.SelectUser()
+		prompt := promptui.Prompt{
+			Label:   "Nome: ",
+			Default: user.Name,
+		}
+		newName, _ := prompt.Run()
+
+		prompt = promptui.Prompt{
+			Label:   "Email: ",
+			Default: user.Email,
+		}
+		newEmail, _ := prompt.Run()
+
+		user.Name = newName
+		user.Email = newEmail
+
+		usersrepository.Update(user)
+		helpers.DisplayMessageAndWaitKey("Usuário atualizado!\nPressione qualquer tecla para continuar.")
+	} else {
+		helpers.DisplayMessageAndWaitKey("Nenhum usuário encontrado :(\nPressione qualquer tecla para continuar.")
 	}
-	newName, _ := prompt.Run()
-
-	prompt = promptui.Prompt{
-		Label:   "Email: ",
-		Default: user.Email,
-	}
-	newEmail, _ := prompt.Run()
-
-	user.Name = newName
-	user.Email = newEmail
-
-	usersrepository.Update(user)
-	fmt.Println("Usuário atualizado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
 }
 
 // DeleteUser delete user
 func DeleteUser() {
-	user := helpers.SelectUser()
-	usersrepository.Select("Card").Delete(&user)
-	fmt.Println("Usuário deletado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
+	if helpers.ExistsAvailableUsers() {
+		user := helpers.SelectUser()
+		usersrepository.Select("Card").Delete(&user)
+		helpers.DisplayMessageAndWaitKey("Usuário deletado!\nPressione qualquer tecla para continuar.")
+	} else {
+		helpers.DisplayMessageAndWaitKey("Nenhum usuário encontrado :(\nPressione qualquer tecla para continuar.")
+	}
 }
 
 // ViewUsers view users
 func ViewUsers() {
-	user := helpers.SelectUser()
-	usersrepository.Association(user, "Card").Find(&user.Card)
+	if helpers.ExistsAvailableUsers() {
+		user := helpers.SelectUser()
+		usersrepository.Association(user, "Card").Find(&user.Card)
 
-	var hasCard string
-	if user.Card.ID == 0 {
-		hasCard = "Não"
+		var hasCard string
+		if user.Card.ID == 0 {
+			hasCard = "Não"
+		} else {
+			hasCard = "Sim"
+		}
+
+		fmt.Println("-- Usuário --")
+		fmt.Println("ID: ", user.ID)
+		fmt.Println("Nome: ", user.Name)
+		fmt.Println("Email: ", user.Email)
+		fmt.Println("Possui cartão: ", hasCard)
+		helpers.DisplayMessageAndWaitKey("\nPressione qualquer tecla para continuar.")
 	} else {
-		hasCard = "Sim"
+		helpers.DisplayMessageAndWaitKey("Nenhum usuário encontrado :(\nPressione qualquer tecla para continuar.")
 	}
-
-	fmt.Println("-- Usuário --")
-	fmt.Println("ID: ", user.ID)
-	fmt.Println("Nome: ", user.Name)
-	fmt.Println("Email: ", user.Email)
-	fmt.Println("Possui cartão: ", hasCard)
-	fmt.Println("\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
 }
