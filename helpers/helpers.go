@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"gormstudy/database"
 	"gormstudy/models"
 	"gormstudy/repositories/usersrepository"
 	"os"
@@ -55,4 +56,39 @@ func SelectUser() models.User {
 	selectedIndex, _, _ := prompt.Run()
 
 	return users[selectedIndex]
+}
+
+// ExistsAvailableProducts check if exists products in database
+func ExistsAvailableProducts() bool {
+	var products []models.Product
+	database.Instance().Find(&products)
+	return len(products) > 0
+}
+
+// SelectProduct : select user
+func SelectProduct() models.Product {
+	var products []models.Product
+	database.Instance().Find(&products)
+
+	var items []string
+	for _, product := range products {
+		items = append(items, fmt.Sprintf("[%d] %s", product.ID, product.Name))
+	}
+
+	prompt := promptui.Select{
+		Label:        "Selecione um usuário",
+		Items:        items,
+		HideHelp:     true,
+		HideSelected: true,
+	}
+
+	selectedIndex, _, _ := prompt.Run()
+
+	return products[selectedIndex]
+}
+
+// DisplayMessageAndWaitKey display message and wait for key press
+func DisplayMessageAndWaitKey(message string) {
+	fmt.Println(message)
+	fmt.Scanln()
 }

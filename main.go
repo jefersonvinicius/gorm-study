@@ -15,9 +15,7 @@ import (
 func mainMenuScreen() {
 	helpers.ClearScreen()
 	options := map[string]func(){
-		"Gerenciar Produtos": func() {
-			fmt.Println("Gerenciar Produtos")
-		},
+		"Gerenciar Produtos": mainProductsScreen,
 		"Gerenciar Usuários": mainUserScreen,
 		"Gerenciar Cartões":  mainCardScreen,
 	}
@@ -78,11 +76,32 @@ func mainCardScreen() {
 
 func mainProductsScreen() {
 	options := map[string]interface{}{
-		"Visualizar Produtos": cruds.ViewUsers,
-		"Criar Produto":       cruds.CreateUser,
-		"Alterar Produto":     cruds.UpdateUser,
-		"Deletar Produto":     cruds.DeleteUser,
-		"Sair":                mainMenuScreen,
+		"Visualizar Produtos": func() {
+			if helpers.ExistsAvailableProducts() {
+				product := helpers.SelectProduct()
+				cruds.ViewProduct(product)
+			} else {
+				helpers.DisplayMessageAndWaitKey("Sem produtos no banco")
+			}
+		},
+		"Criar Produto": cruds.CreateProduct,
+		"Alterar Produto": func() {
+			if helpers.ExistsAvailableProducts() {
+				product := helpers.SelectProduct()
+				cruds.UpdateProduct(product)
+			} else {
+				helpers.DisplayMessageAndWaitKey("Sem produtos no banco")
+			}
+		},
+		"Deletar Produto": func() {
+			if helpers.ExistsAvailableProducts() {
+				product := helpers.SelectProduct()
+				cruds.DeleteProduct(product)
+			} else {
+				helpers.DisplayMessageAndWaitKey("Sem produtos no banco")
+			}
+		},
+		"Sair": mainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
 		Label: "-- Gerenciador de Produtos --",
@@ -97,6 +116,7 @@ func main() {
 
 	database.Instance().AutoMigrate(&models.User{})
 	database.Instance().AutoMigrate(&models.Card{})
+	database.Instance().AutoMigrate(&models.Product{})
 
 	mainMenuScreen()
 }
