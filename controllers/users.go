@@ -1,10 +1,10 @@
-package cruds
+package controllers
 
 import (
 	"fmt"
+	"gormstudy/database"
 	"gormstudy/helpers"
 	"gormstudy/models"
-	"gormstudy/repositories/usersrepository"
 
 	"github.com/manifoldco/promptui"
 )
@@ -20,9 +20,9 @@ func CreateUser() {
 	}
 	email, _ := prompt.Run()
 	user := models.User{Name: name, Email: email}
-	usersrepository.Save(user)
-	fmt.Println("Usuário salvo!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
+	database.Instance().Save(&user)
+	helpers.DisplayMessageAndWaitKey("Usuário salvo!\nPressione qualquer tecla para continuar.")
+
 }
 
 // UpdateUser update user
@@ -30,13 +30,13 @@ func UpdateUser() {
 	if helpers.ExistsAvailableUsers() {
 		user := helpers.SelectUser()
 		prompt := promptui.Prompt{
-			Label:   "Nome: ",
+			Label:   "Nome",
 			Default: user.Name,
 		}
 		newName, _ := prompt.Run()
 
 		prompt = promptui.Prompt{
-			Label:   "Email: ",
+			Label:   "Email",
 			Default: user.Email,
 		}
 		newEmail, _ := prompt.Run()
@@ -44,7 +44,7 @@ func UpdateUser() {
 		user.Name = newName
 		user.Email = newEmail
 
-		usersrepository.Update(user)
+		database.Instance().Save(&user)
 		helpers.DisplayMessageAndWaitKey("Usuário atualizado!\nPressione qualquer tecla para continuar.")
 	} else {
 		helpers.DisplayMessageAndWaitKey("Nenhum usuário encontrado :(\nPressione qualquer tecla para continuar.")
@@ -55,7 +55,7 @@ func UpdateUser() {
 func DeleteUser() {
 	if helpers.ExistsAvailableUsers() {
 		user := helpers.SelectUser()
-		usersrepository.Select("Card").Delete(&user)
+		database.Instance().Select("Card").Delete(&user)
 		helpers.DisplayMessageAndWaitKey("Usuário deletado!\nPressione qualquer tecla para continuar.")
 	} else {
 		helpers.DisplayMessageAndWaitKey("Nenhum usuário encontrado :(\nPressione qualquer tecla para continuar.")
@@ -66,7 +66,7 @@ func DeleteUser() {
 func ViewUsers() {
 	if helpers.ExistsAvailableUsers() {
 		user := helpers.SelectUser()
-		usersrepository.Association(user, "Card").Find(&user.Card)
+		database.Instance().Model(user).Association("Card").Find(&user.Card)
 
 		var hasCard string
 		if user.Card.ID == 0 {

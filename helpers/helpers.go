@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"gormstudy/database"
 	"gormstudy/models"
-	"gormstudy/repositories/usersrepository"
 	"os"
 	"os/exec"
+	"reflect"
 	"runtime"
 
 	"github.com/manifoldco/promptui"
@@ -29,11 +29,8 @@ func ClearScreen() {
 }
 
 // GetMapKeys : get map keys
-func GetMapKeys(data map[string]interface{}) []string {
-	var keys []string
-	for key := range data {
-		keys = append(keys, key)
-	}
+func GetMapKeys(data map[string]interface{}) []reflect.Value {
+	keys := reflect.ValueOf(data).MapKeys()
 	return keys
 }
 
@@ -53,7 +50,8 @@ func ExistsAvailableUsers() bool {
 
 // SelectUser : select user
 func SelectUser() models.User {
-	users := usersrepository.Find()
+	var users []models.User
+	database.Instance().Find(&users)
 	var items []string
 
 	for _, user := range users {

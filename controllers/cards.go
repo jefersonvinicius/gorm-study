@@ -1,9 +1,9 @@
-package cruds
+package controllers
 
 import (
-	"fmt"
+	"gormstudy/database"
+	"gormstudy/helpers"
 	"gormstudy/models"
-	"gormstudy/repositories/cardsrepository"
 
 	"github.com/manifoldco/promptui"
 )
@@ -20,8 +20,9 @@ func CreateCard() models.Card {
 	}
 	password, _ := prompt.Run()
 	card := models.Card{Number: number, Password: password}
-	fmt.Println("Cartão criado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
+
+	helpers.DisplayMessageAndWaitKey("Cartão criado!\nPressione qualquer tecla para continuar.")
+
 	return card
 }
 
@@ -39,15 +40,15 @@ func UpdateCard(card models.Card) {
 	newPassword, _ := prompt.Run()
 	card.Number = newNumber
 	card.Password = newPassword
-	cardsrepository.Update(card)
-	fmt.Println("Cartão atualizado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
+
+	database.Instance().Save(&card)
+
+	helpers.DisplayMessageAndWaitKey("Cartão atualizado!\nPressione qualquer tecla para continuar.")
 
 }
 
 // DeleteCard delete card
 func DeleteCard(card models.Card) {
-	cardsrepository.Delete(card)
-	fmt.Println("Cartão deletado!\nPressione qualquer tecla para continuar.")
-	fmt.Scanln()
+	database.Instance().Delete(&card)
+	helpers.DisplayMessageAndWaitKey("Cartão deletado!\nPressione qualquer tecla para continuar.")
 }

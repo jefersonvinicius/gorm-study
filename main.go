@@ -2,42 +2,39 @@ package main
 
 import (
 	"fmt"
-	"gormstudy/cruds"
+	"gormstudy/controllers"
 	"gormstudy/database"
 	"gormstudy/helpers"
 	"gormstudy/models"
-	"gormstudy/repositories/usersrepository"
-	"reflect"
 
 	"github.com/manifoldco/promptui"
 )
 
 func mainMenuScreen() {
 	helpers.ClearScreen()
-	options := map[string]func(){
+	options := map[string]interface{}{
 		"Gerenciar Produtos": mainProductsScreen,
 		"Gerenciar Usuários": mainUserScreen,
 		"Gerenciar Cartões":  mainCardScreen,
 	}
-	v := reflect.ValueOf(options)
 
 	selectPrompt := promptui.Select{
 		Label:        "-- Menu Principal --",
-		Items:        v.MapKeys(),
+		Items:        helpers.GetMapKeys(options),
 		HideHelp:     true,
 		HideSelected: true,
 	}
 	_, option, _ := selectPrompt.Run()
-	options[option]()
+	options[option].(func())()
 	mainMenuScreen()
 }
 
 func mainUserScreen() {
 	options := map[string]interface{}{
-		"Visualizar Usuários": cruds.ViewUsers,
-		"Criar Usuário":       cruds.CreateUser,
-		"Alterar Usuário":     cruds.UpdateUser,
-		"Deletar Usuário":     cruds.DeleteUser,
+		"Visualizar Usuários": controllers.ViewUsers,
+		"Criar Usuário":       controllers.CreateUser,
+		"Alterar Usuário":     controllers.UpdateUser,
+		"Deletar Usuário":     controllers.DeleteUser,
 		"Sair":                mainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
@@ -56,13 +53,13 @@ func mainCardScreen() {
 	database.Instance().Model(user).Association("Card").Find(&user.Card)
 
 	if user.Card.ID == 0 {
-		card := cruds.CreateCard()
+		card := controllers.CreateCard()
 		user.Card = card
-		usersrepository.Update(user)
+		database.Instance().Save(&user)
 	}
 	options := map[string]interface{}{
-		"Excluir Cartão": func() { cruds.DeleteCard(user.Card) },
-		"Editar Cartão":  func() { cruds.UpdateCard(user.Card) },
+		"Excluir Cartão": func() { controllers.DeleteCard(user.Card) },
+		"Editar Cartão":  func() { controllers.UpdateCard(user.Card) },
 		"Sair":           mainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
@@ -76,32 +73,11 @@ func mainCardScreen() {
 
 func mainProductsScreen() {
 	options := map[string]interface{}{
-		"Visualizar Produtos": func() {
-			if helpers.ExistsAvailableProducts() {
-				product := helpers.SelectProduct()
-				cruds.ViewProduct(product)
-			} else {
-				helpers.DisplayMessageAndWaitKey("Sem produtos no banco")
-			}
-		},
-		"Criar Produto": cruds.CreateProduct,
-		"Alterar Produto": func() {
-			if helpers.ExistsAvailableProducts() {
-				product := helpers.SelectProduct()
-				cruds.UpdateProduct(product)
-			} else {
-				helpers.DisplayMessageAndWaitKey("Sem produtos no banco")
-			}
-		},
-		"Deletar Produto": func() {
-			if helpers.ExistsAvailableProducts() {
-				product := helpers.SelectProduct()
-				cruds.DeleteProduct(product)
-			} else {
-				helpers.DisplayMessageAndWaitKey("Sem produtos no banco")
-			}
-		},
-		"Sair": mainMenuScreen,
+		"Visualizar Produtos": controllers.ViewProduct,
+		"Criar Produto":       controllers.CreateProduct,
+		"Alterar Produto":     controllers.UpdateProduct,
+		"Deletar Produto":     controllers.DeleteProduct,
+		"Sair":                mainMenuScreen,
 	}
 	selectPrompt := promptui.Select{
 		Label: "-- Gerenciador de Produtos --",
