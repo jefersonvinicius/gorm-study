@@ -38,10 +38,11 @@ func mainUserScreen() {
 		"Criar Usuário":       controllers.CreateUser,
 		"Alterar Usuário":     controllers.UpdateUser,
 		"Deletar Usuário":     controllers.DeleteUser,
+		"Compras Realizadas":  controllers.ViewUserSales,
 		"Sair":                mainMenuScreen,
 	}
 
-	items := []string{"Visualizar Usuários", "Criar Usuário", "Alterar Usuário", "Deletar Usuário", "Sair"}
+	items := []string{"Visualizar Usuários", "Criar Usuário", "Alterar Usuário", "Deletar Usuário", "Compras Realizadas", "Sair"}
 	selectPrompt := promptui.Select{
 		Label: "-- Gerenciador de Usuários --",
 		Items: items,

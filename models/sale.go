@@ -4,9 +4,9 @@ import "time"
 
 // Sale struct
 type Sale struct {
-	ID        int `gorm:"primarykey"`
-	UserID    int
-	ProductID int
-	Amount    int
+	ID        uint `gorm:"primarykey"`
+	UserID    uint
+	ProductID uint
+	Amount    int64
 	CreatedAt time.Time
 }

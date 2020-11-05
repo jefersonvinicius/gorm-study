@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"gormstudy/database"
 	"gormstudy/helpers"
@@ -84,4 +85,23 @@ func ViewUsers() {
 	} else {
 		helpers.DisplayMessageAndWaitKey("Nenhum usuário encontrado :(\nPressione qualquer tecla para continuar.")
 	}
+}
+
+// ViewUserSales view user sales
+func ViewUserSales() {
+	user := helpers.SelectUser()
+
+	var sales []models.Sale
+	database.Instance().Where("user_id", user.ID).Find(&sales)
+
+	for _, sale := range sales {
+		j, _ := json.Marshal(sale)
+		fmt.Println(string(j))
+	}
+
+	helpers.DisplayMessageAndWaitKey("")
+	// fmt.Printf("%.10s | %.10s | %.10s | %.10s", "Produto", "Preço", "Quantidade", "Total")
+	// for _, sale := range sales {
+	// 	fmt.Printf("%.10s | %.10s | %.2f | %.2f", sale.Product.Name, sale.Product.Price, sale.Amount, sale.Amount*sale.Product.Price)
+	// }
 }

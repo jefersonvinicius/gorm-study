@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gormstudy/database"
 	"gormstudy/helpers"
+	"gormstudy/models"
 	"strconv"
 
 	"github.com/manifoldco/promptui"
@@ -32,7 +33,9 @@ func MakeSale() {
 		Label: "Quantidade",
 	}
 	amountStr, _ := prompt.Run()
-	amount, _ := strconv.ParseInt(amountStr, 10, 32)
+	amount, _ := strconv.ParseInt(amountStr, 10, 0)
 
-	helpers.DisplayMessageAndWaitKey(fmt.Sprintf("Compra de %d %s", amount, product.Name))
+	sale := models.Sale{ProductID: product.ID, UserID: user.ID, Amount: amount}
+	db.Save(&sale)
+	helpers.DisplayMessageAndWaitKey(fmt.Sprintf("\n\nCompra de %d %s efetuada com sucesso. Pressione qualquer tecla para continuar", amount, product.Name))
 }
