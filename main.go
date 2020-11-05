@@ -5,7 +5,7 @@ import (
 	"gormstudy/controllers"
 	"gormstudy/database"
 	"gormstudy/helpers"
-	"gormstudy/models"
+	"os"
 
 	"github.com/manifoldco/promptui"
 )
@@ -13,14 +13,17 @@ import (
 func mainMenuScreen() {
 	helpers.ClearScreen()
 	options := map[string]interface{}{
-		"Gerenciar Produtos": mainProductsScreen,
 		"Gerenciar Usuários": mainUserScreen,
 		"Gerenciar Cartões":  mainCardScreen,
+		"Gerenciar Produtos": mainProductsScreen,
+		"Realizar Compra":    controllers.MakeSale,
+		"Sair":               func() { os.Exit(0) },
 	}
 
+	items := []string{"Gerenciar Usuários", "Gerenciar Cartões", "Gerenciar Produtos", "Realizar Compra", "Sair"}
 	selectPrompt := promptui.Select{
 		Label:        "-- Menu Principal --",
-		Items:        helpers.GetMapKeys(options),
+		Items:        items,
 		HideHelp:     true,
 		HideSelected: true,
 	}
@@ -37,9 +40,11 @@ func mainUserScreen() {
 		"Deletar Usuário":     controllers.DeleteUser,
 		"Sair":                mainMenuScreen,
 	}
+
+	items := []string{"Visualizar Usuários", "Criar Usuário", "Alterar Usuário", "Deletar Usuário", "Sair"}
 	selectPrompt := promptui.Select{
 		Label: "-- Gerenciador de Usuários --",
-		Items: helpers.GetMapKeys(options),
+		Items: items,
 	}
 	_, option, _ := selectPrompt.Run()
 	options[option].(func())()
@@ -62,9 +67,11 @@ func mainCardScreen() {
 		"Editar Cartão":  func() { controllers.UpdateCard(user.Card) },
 		"Sair":           mainMenuScreen,
 	}
+
+	items := []string{"Excluir Cartão", "Editar Cartão", "Sair"}
 	selectPrompt := promptui.Select{
 		Label:    fmt.Sprintf("Cartão - %s (%s)", user.Name, user.Card.Number),
-		Items:    helpers.GetMapKeys(options),
+		Items:    items,
 		HideHelp: true,
 	}
 	_, option, _ := selectPrompt.Run()
@@ -79,21 +86,18 @@ func mainProductsScreen() {
 		"Deletar Produto":     controllers.DeleteProduct,
 		"Sair":                mainMenuScreen,
 	}
+
+	items := []string{"Visualizar Produtos", "Criar Produto", "Alterar Produto", "Deletar Produto", "Sair"}
 	selectPrompt := promptui.Select{
 		Label: "-- Gerenciador de Produtos --",
-		Items: helpers.GetMapKeys(options),
+		Items: items,
 	}
 	_, option, _ := selectPrompt.Run()
 	options[option].(func())()
 }
 
 func main() {
-	database.InitDatabase()
-
-	database.Instance().AutoMigrate(&models.User{})
-	database.Instance().AutoMigrate(&models.Card{})
-	database.Instance().AutoMigrate(&models.Product{})
-
+	database.Setup()
 	mainMenuScreen()
 }
 

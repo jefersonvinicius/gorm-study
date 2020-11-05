@@ -10,4 +10,5 @@ type User struct {
 	Name      string
 	Email     string
 	Card      Card
+	Products  []*Product `gorm:"many2many:sales;"`
 }

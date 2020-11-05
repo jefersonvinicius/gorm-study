@@ -70,18 +70,18 @@ func SelectUser() models.User {
 	return users[selectedIndex]
 }
 
-// SelectProduct : select user
+// SelectProduct select product
 func SelectProduct() models.Product {
 	var products []models.Product
 	database.Instance().Find(&products)
 
 	var items []string
 	for _, product := range products {
-		items = append(items, fmt.Sprintf("[%d] %s", product.ID, product.Name))
+		items = append(items, fmt.Sprintf("[%d] %s (R$%.2f)", product.ID, product.Name, product.Price))
 	}
 
 	prompt := promptui.Select{
-		Label:        "Selecione um usuário",
+		Label:        "Selecione um produto",
 		Items:        items,
 		HideHelp:     true,
 		HideSelected: true,
